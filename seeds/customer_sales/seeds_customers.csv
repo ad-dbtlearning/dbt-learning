@@ -1,0 +1,11 @@
+customer_id,customer_name,region_id,channel
+1,Store_1,3,Online
+2,Store_2,4,Online
+3,Store_3,1,Online
+4,Store_4,3,Online
+5,Store_5,3,Retail
+6,Store_6,4,Online
+8,Store_8,1,Retail
+9,Store_9,3,Wholesale
+10,Store_10,2,Wholesale
+11,Store_11,3,Retail

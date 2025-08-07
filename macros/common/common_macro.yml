@@ -1,0 +1,7 @@
+version: 2
+
+macros:
+  - name: add_new_column
+    description: Add new column in table.
+  - name: create_schema_if_not_exists
+    description: Creates a schema if it does not already exist.
