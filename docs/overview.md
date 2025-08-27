@@ -1,81 +1,116 @@
-{# overview.md #}
 
 {% docs __overview__ %}
 
-# DBT + Snowflake POC
+# dbt POC Documentation
 
-## Project Goal
+This POC demonstrates implementation of **dbt (Data Build Tool)** for building a modern data stack with **Snowflake** as the warehouse. 
 
-To  build a POC using dbt with Snowflake to demonstrate:
+The Project includes incremental loads, full load, reporting views, seeds, macros, and test.
 
-Features are used in POC
+## Project Folder Structure
 
-1. Data ingestion from one Snowflake database to another
-    - Source models were created using source() references to pull data from an existing snowflake database and schema.
-    - Data was transformed and loaded into a new schema/database (EDW) using dbt models.
-2. Environment-based configuration (dev, uat, prod)
-    - Configure multiple targets in profiles.yml
-    - Schema and database separation used for each environment.
-3. Incremental
-    - Incremental models created using ```materialized='incremental'``` with ```merge strategy```.
-4. Documentation
-    - Metadata and column-level documentation added using ```.yaml``` files in the model directories.
-    - Markdown files created with ```docs/``` folder for business logic explanations.
-    - Auto-generated docs with
-
-    ```
-      dbt docs generate  
-      dbt docs serve
-    ```
-
-5. Testing
-    - Added dbt built-in tests; ```unique```, ```not null```, and custom tests.
-    - tests places in ```/tests/``` folder or inline in ``.yml`` files.
-
-6. CI/CD readiness
-    - dbt commands used:
-       - `dbt build`:  run + test + snapshot
-       - `dbt docs generate`: for doc site
-
-## Folder structure used
-
-below folder structure being used
+```
+├── analyses/              # Custom SQL analyses not included in dbt runs
+├── data/                  # Static CSVs used for reference
+├── dbt_internal_packages/ # Auto-installed dbt adapter macros (dbt-adapters, dbt-snowflake)
+├── dbt_packages/          # External dbt packages (dependencies)
+├── docs/                  # Documentation markdowns and schema.yml for dbt docs
+├── logs/                  # Execution logs
+├── macros/                # Custom macros for reusable SQL logic
+│   ├── common
+│   ├── edw/customer_sales
+│   ├── raw/customer_sales
+│   └── utils
+├── models/                # Core dbt models (SQL transformations)
+│   ├── analytics
+│   ├── edw/customer_sales/incremental_tables
+│   └── raw/customer_sales/{full_load_tables, incremental_tables}
+├── seeds/                 # Reference data tables loaded into DB
+├── snapshots/             # Point-in-time tracking of slowly changing data
+├── target/                # Compiled SQL, manifest, and run artifacts
+├── tests/                 # Custom data tests
+└── dbt_project.yml        # Main dbt project configuration
 
 ```
 
-dbt_project/ 
-├── dbt_project.yml 
-├── packages.yml 
-├── models/ 
-│ ├── source/ 
-│ │ └── snowflake/ 
-│ │   └── snowflake_sample_data.yml 
-│ ├── edw/ 
-│ │ ├── staging/ 
-│ │ │ ├── stg_customers.sql 
-│ │ │ └── stg_orders.sql 
-│ │ │ ├── dim/ 
-│ │ │ │ ├── dim_customers.sql 
-│ │ │ │ └── dim_products.sql 
-│ │ │ ├── int/ 
-│ │ │ ├── int_customer_orders.sql 
-│ │ │ └── int_order_metrics.sql 
-│ │ │ ├── fact/ 
-│ │ │   ├── fact_orders.sql 
-│ │ │   └── fact_revenue.sql 
-│ │ │ ├── view/ 
-│ │ │   └── vw_customer_summary.sql 
-│ │ └── finance/ 
-│ |   └── fact_financials.sql 
-│ ├── macros/ 
-│   └── custom_macros.sql 
-│ ├── seeds/ 
-│   └── country_codes.csv 
-│ ├── snapshots/ 
-│   └── customer_snapshots.sql 
-│ ├── tests/ 
-│   └── unique_customer_id.sql 
-└── docs/ 
-  └── dim_customers.md 
+### 1. Macros for Schema Creation & Init tables
+
+Defined in **on-run-start**:
+
+``` yml
+// dbt_project.yml
+
 
 ```
+
+### 2. Incremental Models
+
+- Implemented for RAW and EDW layers.
+- Uses `delete+insert` **strategy** for efficient reprocessing.
+
+Example:
+
+``` yml    
+    +materialized: incremental
+    +incremental_strategy: delete+insert
+    +on_schema_change: ignore
+```
+
+### 3. Full Load Models
+
+- Certain **BAS tables** in **RAW layer** are build as full-refresh tables.
+
+Example:
+
+```yml
++materialized: table
++on_schema_change: ignore
+```
+
+### 4. Views for Reporting
+
+- EDW reporting layer models are materialized as views.
+
+``` yml
+
++materialized: view
+
+```
+
+### 6. Tags for Model Grouping
+
+Models are grouped with **tags** for easy filtering:
+
+``` YML
++tags: ["incremental_tables", "customer_sales"]
++tags: ["edw", "reporting"]
+
+```
+
+### 7. Seeds 
+
+- Files are located in /seeds/customer_sales, load master data to snowflake.
+- Configure with environment.
+
+``` yml
+
+seeds:
+  +quote_columns: false
+  +schema: "SEED"
+  
+```
+
+### 8. Custom Macros
+
+- `macros/common`:- Common macros
+- `macros/raw/customer_sales`:- RAW layer macros
+- `macros/edw/customer_sales`:- EDW layer macros
+
+### 9. Testing Framework
+
+
+
+
+
+
+{% enddocs %}

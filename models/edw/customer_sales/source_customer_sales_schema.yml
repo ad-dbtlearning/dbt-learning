@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: CUSTOMER_SALES_SOURCE
+    database: "{{ var('raw_database') }}"
+    schema: BAS_CUSTOMER_SALES
+    tables:
+      - name: BAS_CUSTOMERS
+      - name: BAS_CUSTOMER_SALES
+      - name: BAS_DISTRIBUTORS
+      - name: BAS_PRODUCTS
+      - name: BAS_PROMOTIONS
+      - name: BAS_REGION

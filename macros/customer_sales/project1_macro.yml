@@ -1,7 +1,0 @@
-version: 2
-
-macros:
-  - name: customer_sales_init_alltables
-    description: Initializes all customer_sales tables by calling dependent macros.
-  - name: bas_dim_customers
-    description: Creates the STAGING.dim_customers table with default fields.
