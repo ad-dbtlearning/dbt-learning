@@ -1,0 +1,209 @@
+{{ 
+  config(
+      alias='DIM_CUSTOMERS',
+      materialized='incremental',      
+      unique_key='CUSTOMER_KEY'
+  ) 
+}}
+
+WITH SOURCE_DATA AS (
+    SELECT
+        S.CUSTOMER_ID,
+        S.CUSTOMER_NAME,
+        S.EMAIL,
+        S.PHONE_NUMBER,        
+        S.ADDRESS,        
+        S.LOYALTY_STATUS,
+        S.ACCOUNT_STATUS,
+        S.CHANNEL,
+        S.REGION_ID,
+        S.STORE,
+        S.RECORD_HASH,        
+        S.UPDATED_AT
+    FROM {{ ref('edw_cs_cln_customers') }} S    
+),
+
+CURRENT_DIM AS (
+    SELECT *
+    FROM {{ this }}
+    WHERE IS_ACTIVE = TRUE
+),
+
+-- detect changed records
+CHANGED AS (
+    SELECT S.CUSTOMER_ID,
+        S.CUSTOMER_NAME,
+        S.EMAIL,
+        S.PHONE_NUMBER,    
+        S.ADDRESS,    
+        S.LOYALTY_STATUS,
+        D.LOYALTY_STATUS AS PREVIOUS_LOYALTY_STATUS,
+        S.ACCOUNT_STATUS,
+        D.ACCOUNT_STATUS AS PREVIOUS_ACCOUNT_STATUS,
+        S.CHANNEL,
+        S.REGION_ID,
+        S.STORE,
+        S.RECORD_HASH,
+        S.UPDATED_AT
+    FROM SOURCE_DATA S
+    INNER JOIN CURRENT_DIM D
+      ON S.CUSTOMER_ID = D.CUSTOMER_ID
+    WHERE S.RECORD_HASH <> D.RECORD_HASH
+),
+
+-- unchanged records
+UNCHANGED AS (
+    SELECT
+        D.CUSTOMER_KEY,
+        D.CUSTOMER_ID,
+        D.CUSTOMER_NAME,
+        D.EMAIL,
+        D.PHONE_NUMBER,
+        D.ADDRESS,
+        D.LOYALTY_STATUS,
+        D.PREVIOUS_LOYALTY_STATUS,
+        D.ACCOUNT_STATUS,
+        D.PREVIOUS_ACCOUNT_STATUS,
+        D.CHANNEL,
+        D.REGION_ID,        
+        D.STORE,
+        D.ELT_TS,
+        D.UPDATED_AT,
+        D.VALID_FROM,
+        D.VALID_TO,
+        D.IS_ACTIVE,
+        D.RECORD_HASH
+    FROM CURRENT_DIM D
+    LEFT JOIN CHANGED C
+      ON D.CUSTOMER_ID = C.CUSTOMER_ID
+    LEFT JOIN SOURCE_DATA S
+      ON D.CUSTOMER_ID = S.CUSTOMER_ID
+    WHERE C.CUSTOMER_ID IS NULL
+      AND S.CUSTOMER_ID IS NOT NULL  
+),
+
+-- expire old versions when change detected
+EXPIRED AS (
+    SELECT
+        D.CUSTOMER_KEY,
+        D.CUSTOMER_ID,
+        D.CUSTOMER_NAME,
+        D.EMAIL,
+        D.PHONE_NUMBER,
+        D.ADDRESS,
+        D.LOYALTY_STATUS,
+        D.PREVIOUS_LOYALTY_STATUS,
+        D.ACCOUNT_STATUS,
+        D.PREVIOUS_ACCOUNT_STATUS,
+        D.CHANNEL,
+        D.REGION_ID,
+        D.STORE,
+        D.ELT_TS,
+        D.UPDATED_AT,
+        D.VALID_FROM,
+        CURRENT_TIMESTAMP() AS VALID_TO,
+        FALSE AS IS_ACTIVE,
+        D.RECORD_HASH
+    FROM CURRENT_DIM D
+    INNER JOIN CHANGED C
+      ON D.CUSTOMER_ID = C.CUSTOMER_ID
+),
+
+-- insert new versions
+NEW_VERSIONS AS (
+    SELECT
+        {{ dbt_utils.generate_surrogate_key(['C.CUSTOMER_ID','C.UPDATED_AT']) }} AS CUSTOMER_KEY,
+        C.CUSTOMER_ID,
+        C.CUSTOMER_NAME,
+        C.EMAIL,
+        C.PHONE_NUMBER,    
+        C.ADDRESS,    
+        C.LOYALTY_STATUS,
+        LAG(C.LOYALTY_STATUS) OVER (PARTITION BY C.CUSTOMER_ID ORDER BY C.UPDATED_AT) AS PREVIOUS_LOYALTY_STATUS,
+        C.ACCOUNT_STATUS,
+        LAG(C.ACCOUNT_STATUS) OVER (PARTITION BY C.CUSTOMER_ID ORDER BY C.UPDATED_AT) AS PREVIOUS_ACCOUNT_STATUS,
+        C.CHANNEL,
+        C.REGION_ID,
+        C.STORE,
+        CURRENT_TIMESTAMP()::TIMESTAMP_LTZ(9) AS ELT_TS,
+        C.UPDATED_AT,
+        CURRENT_TIMESTAMP() AS VALID_FROM,
+        CAST(NULL AS TIMESTAMP_LTZ(9)) AS VALID_TO, 
+        TRUE AS IS_ACTIVE,
+        C.RECORD_HASH
+    FROM SOURCE_DATA C
+    LEFT JOIN (
+        SELECT CUSTOMER_ID, IS_ACTIVE
+        FROM CURRENT_DIM
+        QUALIFY ROW_NUMBER() OVER (PARTITION BY CUSTOMER_ID ORDER BY VALID_FROM DESC) = 1
+    ) D
+    ON C.CUSTOMER_ID = D.CUSTOMER_ID
+    WHERE D.CUSTOMER_ID IS NULL
+    OR D.IS_ACTIVE = FALSE
+),
+
+-- insert changed records (new active version)
+CHANGED_INSERTS AS (  
+    SELECT
+        {{ dbt_utils.generate_surrogate_key(['S.CUSTOMER_ID','S.UPDATED_AT']) }} AS CUSTOMER_KEY,
+        S.CUSTOMER_ID,
+        S.CUSTOMER_NAME,
+        S.EMAIL,
+        S.PHONE_NUMBER,    
+        S.ADDRESS,    
+        S.LOYALTY_STATUS,
+        S.PREVIOUS_LOYALTY_STATUS,
+        S.ACCOUNT_STATUS,
+        S.PREVIOUS_ACCOUNT_STATUS,
+        S.CHANNEL,
+        S.REGION_ID,
+        S.STORE,
+        CURRENT_TIMESTAMP()::TIMESTAMP_LTZ(9) AS ELT_TS,
+        S.UPDATED_AT,
+        CURRENT_TIMESTAMP() AS VALID_FROM,
+        CAST(NULL AS TIMESTAMP_LTZ(9)) AS VALID_TO, 
+        TRUE AS IS_ACTIVE,
+        S.RECORD_HASH
+    FROM CHANGED S
+),
+
+
+
+-- deletions (no longer in source)
+DELETED AS (
+    SELECT
+        D.CUSTOMER_KEY,
+        D.CUSTOMER_ID,
+        D.CUSTOMER_NAME,
+        D.EMAIL,
+        D.PHONE_NUMBER,
+        D.ADDRESS,
+        D.LOYALTY_STATUS,
+        D.PREVIOUS_LOYALTY_STATUS,
+        D.ACCOUNT_STATUS,
+        D.PREVIOUS_ACCOUNT_STATUS,
+        D.CHANNEL,
+        D.REGION_ID,
+        D.STORE,
+        D.ELT_TS,
+        D.UPDATED_AT,
+        D.VALID_FROM,
+        CURRENT_TIMESTAMP() AS VALID_TO,
+        FALSE AS IS_ACTIVE,
+        D.RECORD_HASH
+    FROM CURRENT_DIM D
+    LEFT JOIN SOURCE_DATA S
+      ON S.CUSTOMER_ID = D.CUSTOMER_ID
+    WHERE S.CUSTOMER_ID IS NULL
+)
+
+-- final output
+SELECT * FROM UNCHANGED
+UNION ALL
+SELECT * FROM EXPIRED
+UNION ALL
+SELECT * FROM NEW_VERSIONS
+UNION ALL
+SELECT * FROM CHANGED_INSERTS
+UNION ALL
+SELECT * FROM DELETED

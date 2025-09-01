@@ -40,6 +40,7 @@ Defined in **on-run-start**:
 ``` yml
 // dbt_project.yml
 
+Call macros to create schemas and tables
 
 ```
 
@@ -107,9 +108,6 @@ seeds:
 - `macros/edw/customer_sales`:- EDW layer macros
 
 ### 9. Testing Framework
-
-
-
 
 
 

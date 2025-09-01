@@ -33,9 +33,9 @@ vars:
   raw_database: DB_DEV_BI_RAW
   edw_database: DB_DEV_BI_EDW
 
-on-run-start:
-  - "{{ raw_customer_sales_init_alltables() }}"
-  - "{{ edw_customer_sales_init_alltables() }}"
+# on-run-start:
+#   - "{{ raw_customer_sales_init_alltables() }}"
+#   - "{{ edw_customer_sales_init_alltables() }}"
 
 models:
   dbtdevlearning:
@@ -50,24 +50,36 @@ models:
         incremental_tables:
           bas:
             +tags: ["incremental_tables", "customer_sales"]
-            +schema: BAS_CUSTOMER_SALES
+            +schema: CS_GENERAL_STAGING
             +materialized: incremental
             +incremental_strategy: delete+insert
             +on_schema_change: ignore
 
         full_load_tables:
           bas:
-            +schema: BAS_CUSTOMER_SALES
+            +schema: CS_GENERAL_STAGING
             +materialized: table
             +on_schema_change: ignore
     edw:
       customer_sales:
         incremental_tables:
-          fact:
-            +tags: ["edw", "incremental_tables", "fact", "customer_sales"]
-            +schema: FACT_SALES
+          cln:
+            +tags: ["edw", "incremental_tables", "cln", "customer_sales"]
+            +schema: CS_GENERAL_CLN
             +materialized: incremental
             +incremental_strategy: delete+insert
+            +on_schema_change: ignore
+          dim:
+            +tags: ["edw", "incremental_tables", "dim", "customer_sales"]
+            +schema: CS_GENERAL_DIM
+            +materialized: incremental
+            +incremental_strategy: delete+insert
+            +on_schema_change: ignore
+          fact:
+            +tags: ["edw", "incremental_tables", "fct", "customer_sales"]
+            +schema: CS_GENERAL_FACT
+            +materialized: incremental
+            +incremental_strategy: merge
             +on_schema_change: ignore
           reporting:
             +tags: ["edw", "reporting_view", "reporting", "customer_sales"]

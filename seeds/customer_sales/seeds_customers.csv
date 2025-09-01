@@ -1,11 +1,12 @@
-customer_id,customer_name,region_id,channel
-1,Store_1,3,Online
-2,Store_2,4,Online
-3,Store_3,1,Online
-4,Store_4,3,Online
-5,Store_5,3,Retail
-6,Store_6,4,Online
-8,Store_8,1,Retail
-9,Store_9,3,Wholesale
-10,Store_10,2,Wholesale
-11,Store_11,3,Retail
+customer_id,customer_name,email,phone_number,address,region,region_id,loyalty_status,previous_loyalty_status,account_status,previous_account_status,channel,store
+1,Store_1,store1@example.com,9876543210,123 Main St,Region 3,3,Gold,Silver,Active,Active,Online,Store_1
+2,Store_2,store2@example.com,9876543211,456 Oak St,Region 4,4,Silver,Bronze,Active,Inactive,Online,Store_2
+3,Store_3,store3@example.com,9876543212,789 Pine St,Region 1,1,Bronze,Bronze,Inactive,Active,Online,Store_3
+4,Store_4,store4@example.com,9876543213,321 Elm St,Region 3,3,Gold,Silver,Active,Inactive,Online,Store_4
+5,Store_5,store5@example.com,9876543214,654 Maple St,Region 3,3,Platinum,Gold,Active,Active,Retail,Store_5
+6,Store_6,store6@example.com,9876543215,987 Cedar St,Region 4,4,Silver,Bronze,Active,Inactive,Online,Store_6
+8,Store_8,store8@example.com,9876543216,147 Birch St,Region 1,1,Gold,Silver,Inactive,Active,Retail,Store_8
+9,Store_9,store9@example.com,9876543217,258 Walnut St,Region 3,3,Bronze,Silver,Active,Active,Wholesale,Store_9
+10,Store_10,store10@example.com,9876543218,369 Cherry St,Region 2,2,Silver,Bronze,Active,Inactive,Wholesale,Store_10
+11,Store_11,store11@example.com,9876543219,159 Spruce St,Region 3,3,Gold,Silver,Active,Active,Retail,Store_11+new
+12,Store_12,store12@example.com,9876543220,160 Spruce Road,Region 3,3,Gold,Platinum,N/A,N/A,Retail,Store_12
