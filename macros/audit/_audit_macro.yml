@@ -1,0 +1,13 @@
+version: 2
+
+macros:
+  - name: audit_log
+    description: |
+      - This macro creates an audit log table to log audit information.
+      - **Usage example:**
+         '{% raw %}{{ audit_log() }}{% endraw %}'
+  - name: log_audit
+    description: |
+      - This macro insert audit log informantion
+      - **Usage example:**
+         '{% raw %}{{ audit_log() }}{% endraw %}'

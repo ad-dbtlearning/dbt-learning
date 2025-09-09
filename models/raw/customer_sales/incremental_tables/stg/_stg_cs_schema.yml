@@ -2,8 +2,19 @@ version: 2
 
 models:
   - name: load_stg_customer_sales
-    description: "Loads data into CUSTOMER_SALES fact table"
+    description: |
+      - Staging table for customer sales transactions.
+      - Loaded incrementally from source csv seed files.
+      - Provides raw sales transaction data.
+      - Used as the source for building the cleaned table `edw_cs_cln_customer_sales`
     columns:
+      - name: NET_PRICE
+        description: Customer sales net NET_PRICE
+        tests:
+          - non_negative
+      - name: quantity
+        tests:
+          - non_zero
       - name: sales_id
         description: "Unique identifier for each sale transaction."
         tests:

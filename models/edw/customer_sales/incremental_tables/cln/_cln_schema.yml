@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: edw_cs_cln_customer_sales
+    description: |
+      This model stores cleaned and standardized customer sales data.
+      It is built on top of raw source customer sales table.
+
+      - Key points:
+          - Removes duplicate transactions
+          - Standardizes customer sales key
+      - Downstream usage:
+          - Used by FACT table for customer sales
+  - name: edw_cs_cln_customers
+    description: |
+      This model stores cleaned and standardized customers data.
+      It is built on top of raw source customer table.
+
+      - Key points:          
+          - Created hash key `RECORD_HASH` to use SCD implementation.
+      - Downstream usage:
+          - Used by dim for creating dimensions table.
+  - name: edw_cs_cln_distributors
+    description: |
+      This model stores cleaned and standardized customers data.
+      It is built on top of raw source customer table.
+
+      - Key points:          
+          - Removes duplicate transactions
+      - Downstream usage:
+          - Used by dim for creating dimensions table.
+  - name: edw_cs_cln_products
+    description: |
+      This model stores cleaned and standardized customers data.
+      It is built on top of raw source customer table.
+
+      - Key points:          
+          - Created hash key `RECORD_HASH` to use SCD implementation.
+      - Downstream usage:
+          - Used by dim for creating dimensions table.
+  - name: edw_cs_cln_promotions
+    description: |
+      This model stores cleaned and standardized customers data.
+      It is built on top of raw source customer table.
+
+      - Key points:          
+          - Removes duplicate transactions
+      - Downstream usage:
+          - Used by dim for creating dimensions table.
+  - name: edw_cs_cln_region
+    description: |
+      This model stores cleaned and standardized customers data.
+      It is built on top of raw source customer table.
+
+      - Key points:          
+          - Removes duplicate transactions
+      - Downstream usage:
+          - Used by dim for creating dimensions table.

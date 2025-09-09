@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: edw_cs_dim_customers
+    description: |
+      - This table stores customer details with history.
+      - It is a Slowly Changing Dimension Type-2 (SCD2).
+      - When customer details change, a new record is added.
+      - Old records are kept with start and end dates.
+      - Only one record is active at a time.
+  - name: edw_cs_dim_cs_date
+    description: |
+      - This is a Date Dimension table.
+      - Stores calendar-related fields like day, month, quarter, year.
+      - Used for reporting and time-based analysis.
+      - Slowly Changing Dimension Type-1 (SCD1) → values are always current.
+
+  - name: edw_cs_dim_distributors
+    description: |
+      - This table stores distributor details.
+      - Built on top of cln distributor table.      
+      - Slowly Changing Dimension Type-1 (SCD1) → only keeps latest values.
+
+  - name: edw_cs_dim_products
+    description: |
+      - This table stores product details.
+      - Built on top of cln product table.
+      - Created a `RECORD_HASH` key to track changes.
+      - Slowly Changing Dimension Type-2 (SCD2) → history is maintained, new record added for changes.
+      - Used downstream for product-related reporting.
+      - Used downstream in fact table.
+
+  - name: edw_cs_dim_promotions
+    description: |
+      - This table stores promotion details.
+      - Built on top of cln promotions table.      
+      - Slowly Changing Dimension Type-1 (SCD1) → only keeps latest values.
+      - Used downstream in fact table.
+
+  - name: edw_cs_dim_region
+    description: |
+      - This table stores region details.
+      - Built on top of cln region table.
+      - Slowly Changing Dimension Type-1 (SCD1) → only keeps latest values.
+      - Used downstream in fact table.

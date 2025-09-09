@@ -1,0 +1,21 @@
+version: 2
+
+macros:
+  - name: raw_customer_sales_init_alltables
+    description: |
+      - This macro initializes the **raw staging layer** for the Customer Sales project.
+      - It creates the required schema if it doesn’t already exist and then builds staging tables.
+
+      - Steps included:
+          - Creates schema: `RAW.CS_GENERAL_STAGING`
+          - Builds staging (STG) tables:
+            - Customers
+            - Products
+            - Region
+            - Promotions
+            - Distributors
+            - Customer Sales
+
+      - Usage:
+          - Run this macro to set up all raw staging tables before transformation starts.
+          - Example: {% raw %} {{ raw_customer_sales_init_alltables() }} {% endraw %}

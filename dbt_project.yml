@@ -30,6 +30,11 @@ vars:
       dev: DB_DEV_BI_EDW
       qa: DB_QA_BI_EDW
       prod: DB_P_BI_EDW
+    audit_db:
+      dev: DB_DEV_AUDIT
+      qa: DB_UAT_AUDIT
+      prod: DB_PROD_AUDIT
+
   raw_database: DB_DEV_BI_RAW
   edw_database: DB_DEV_BI_EDW
 
@@ -48,7 +53,7 @@ models:
         {%- endif -%}
       customer_sales:
         incremental_tables:
-          bas:
+          stg:
             +tags: ["incremental_tables", "customer_sales"]
             +schema: CS_GENERAL_STAGING
             +materialized: incremental
@@ -56,12 +61,14 @@ models:
             +on_schema_change: ignore
 
         full_load_tables:
-          bas:
+          +post-hook: "{{ log_audit() }}"
+          stg:
             +schema: CS_GENERAL_STAGING
             +materialized: table
             +on_schema_change: ignore
     edw:
       customer_sales:
+        +post-hook: "{{ log_audit() }}"
         incremental_tables:
           cln:
             +tags: ["edw", "incremental_tables", "cln", "customer_sales"]
@@ -81,11 +88,16 @@ models:
             +materialized: incremental
             +incremental_strategy: merge
             +on_schema_change: ignore
-          reporting:
-            +tags: ["edw", "reporting_view", "reporting", "customer_sales"]
-            +schema: REPORTING_SALES
-            +materialized: view
-
+        reporting:
+          +tags: ["edw", "reporting_view", "reporting", "customer_sales"]
+          +schema: CS_REPORTING_SALES
+          +materialized: view
+    marts:
+      customer_sales:
+        sales:
+          +tags: ["edw", "reporting_view", "reporting", "customer_sales"]
+          +schema: MART_SALES
+          +materialized: view
 seeds:
   +quote_columns: false
   +database: |

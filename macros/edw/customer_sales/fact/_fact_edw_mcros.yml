@@ -1,0 +1,6 @@
+version: 2
+
+macros:
+  - name: fact_customer_sales
+    description: |
+      - This macro create table *CS_GENERAL_FACT.FACT_CUSTOMER_SALES* if enot exist.

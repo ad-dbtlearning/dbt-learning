@@ -1,0 +1,19 @@
+version: 2
+
+tests:
+  - name: non_negative
+    description: |
+      Ensures that the column values are never negative.
+      Fails if any row has a value < 0.
+    arguments:
+      - name: column_name
+        type: string
+        description: "The column to check for non-negative values."
+  - name: non_zero
+    description: |
+      Ensures that the column values are never zero.
+      Fails if any row has a value = 0.
+    arguments:
+      - name: column_name
+        type: string
+        description: "The column to check for non-zero values."

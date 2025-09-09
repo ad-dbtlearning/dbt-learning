@@ -60,15 +60,15 @@ SELECT
     DATE.YEAR AS SALES_YEAR,
     DATE.IS_WEEKEND AS SALES_IS_WEEKEND
 FROM S_CUSTOMER_SALES AS CS
-INNER JOIN {{ref ('edw_cs_dim_customers')}} AS CUST
+LEFT JOIN {{ref ('edw_cs_dim_customers')}} AS CUST
     ON CS.CUSTOMER_ID = CUST.CUSTOMER_ID
     AND CUST.IS_ACTIVE = TRUE
-INNER JOIN {{ref ('edw_cs_dim_products')}} AS PROD
+LEFT JOIN {{ref ('edw_cs_dim_products')}} AS PROD
     ON CS.PRODUCT_ID = PROD.PRODUCT_ID
     AND PROD.IS_ACTIVE = TRUE
-INNER  JOIN {{ref('edw_cs_dim_promotions') }} AS PROMO
+LEFT  JOIN {{ref('edw_cs_dim_promotions') }} AS PROMO
     ON CS.PROMOTION_ID = PROMO.PROMOTION_ID
-INNER JOIN {{ref ('edw_cs_dim_region')}} AS REG
+LEFT JOIN {{ref ('edw_cs_dim_region')}} AS REG
     ON CUST.REGION_ID = REG.REGION_ID
-INNER JOIN {{ref ('edw_cs_dim_cs_date')}} AS DATE
+LEFT JOIN {{ref ('edw_cs_dim_cs_date')}} AS DATE
     ON CS.SALES_DATE = to_char(DATE.FULL_DATE, 'YYYY-MM-DD')

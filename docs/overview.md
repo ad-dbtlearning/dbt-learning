@@ -1,113 +1,91 @@
-
 {% docs __overview__ %}
 
-# dbt POC Documentation
+# Overview
 
-This POC demonstrates implementation of **dbt (Data Build Tool)** for building a modern data stack with **Snowflake** as the warehouse. 
+In this project, I implement dbt (Data Build Tool) to build a modern data stack with Snowflake as the data warehouse.
 
-The Project includes incremental loads, full load, reporting views, seeds, macros, and test.
+### It demonstrates how dbt can be used to:
+
+#### Load Data from CSV files into the Raw Layer
+
+- 	Clean & Organize data into a structured Cleansed Layer
+- 	Build Incremental Models to process only new or updated records efficiently
+- 	Create Dimensions & Facts for analytics
+- 	Implement Slowly Changing Dimensions (SCD Type-2) to track historical changes in customer data
+- 	Log Audit Information: Each dbt run is recorded in a logging table
+- 	Add Tests (uniqueness, not null, non-zero, non-negative) to ensure data quality
+- 	Develop Reporting / Mart Layer for business insights such as sales by customers, region, and time
+- 	DAGs: In dbt, each model is a node, and dependencies between models form a Directed Acyclic Graph (DAG). This ensures models are built in the correct order. (See DAG section for a graphical representation.)
+
+### Next Steps and Expansions
+
+- Python Integration
+  -  Build Python models for scenarios not possible in SQL
+  -	Example: Fetch data directly from APIs
+
+- CI/CD Implementation	
+  - Automate dbt build, test, and deployment using Azure DevOps or GitHub Actions
+  -	Enforce data quality checks before deployment
+
+- Data Orchestration with Azure Data Factory (ADF)
+  -	Use ADF pipelines to load data from multiple sources (SAP, Salesforce, API, Blob, etc.) into the RAW Layer
+  -	Automate end-to-end workflows (Extract → Load → dbt Transform → Report)
+  -	Schedule daily and real-time runs
+- Multi-Platform dbt Extension
+  -	Extend support for multi-cloud platforms (Snowflake + Databricks + Synapse)
+  -	Maintain a unified dbt codebase with adapters for different warehouses
+
 
 ## Project Folder Structure
 
 ```
-├── analyses/              # Custom SQL analyses not included in dbt runs
-├── data/                  # Static CSVs used for reference
-├── dbt_internal_packages/ # Auto-installed dbt adapter macros (dbt-adapters, dbt-snowflake)
-├── dbt_packages/          # External dbt packages (dependencies)
-├── docs/                  # Documentation markdowns and schema.yml for dbt docs
-├── logs/                  # Execution logs
-├── macros/                # Custom macros for reusable SQL logic
-│   ├── common
-│   ├── edw/customer_sales
-│   ├── raw/customer_sales
-│   └── utils
-├── models/                # Core dbt models (SQL transformations)
-│   ├── analytics
-│   ├── edw/customer_sales/incremental_tables
-│   └── raw/customer_sales/{full_load_tables, incremental_tables}
-├── seeds/                 # Reference data tables loaded into DB
-├── snapshots/             # Point-in-time tracking of slowly changing data
-├── target/                # Compiled SQL, manifest, and run artifacts
-├── tests/                 # Custom data tests
-└── dbt_project.yml        # Main dbt project configuration
+dbt_project/
+├── models/                         # SQL models (core transformations)
+│   ├── raw/                        # Raw layer - source-aligned models
+│   │   └── customer_sales/
+│   │       ├── full_load_tables/   # One-time or snapshot full loads
+│   │       └── incremental_tables/ # Incremental loads (append/merge)
+│   │
+│   ├── edw/                        # Enterprise Data Warehouse - curated layer
+│   │   └── customer_sales/         # Project name
+│   │       ├── full_load_tables/   # Full load EDW tables
+│   │       └── incremental_tables/ # Incremental EDW tables
+│   │           ├── cln/            # Cleaned staging layer
+│   │           ├── dim/            # Dimensions (SCDs, reference data)
+│   │           └── fact/           # Fact tables (transactions, measures)
+│   │
+│   ├── marts/                      # Presentation/reporting layer
+│   │   ├── customer_sales/         # Sales reporting marts
+│   │   │   └── sales/
+│   │   └── finance/
+│   │
+│   └── schema.yml                  # Tests + documentation for models
+│
+├── macros/                         # Create SF tables & Custom functions
+│   ├── common/                     # Utility macros (e.g., surrogate keys)
+│   ├── edw/                        # EDW-Tables' specific macros
+│   │   └── customer_sales/         # Project Name
+│   │       ├── cln/                # Cleaning/staging Tables' macros
+│   │       ├── dim/                # Dimension handling Tables' macros
+│   │       └── fact/               # Fact building Tables's macros
+│   └── raw/                        # Raw layer-specific Tables' macros
+│       └── customer_sales/
+│           ├── dimensions/         # Dimension creation Tables' macros
+│           └── stg/                # Staging Tables' macros
+│
+├── seeds/                          # Load data to SF from csv using seed
+│   └── customer_sales/             # Lookup or reference datasets
+│
+├── docs/                           # Project documentation (Markdown/diagrams)
+│   ├── overview.md
+│
+├── tests/                          # Custom and generic tests
+│   └── generic/                    # Reusable generic test definitions
+│
+├── dbt_project.yml                 # Main dbt project config
+└── packages.yml                    # External dbt packages (dependencies)
 
 ```
-
-### 1. Macros for Schema Creation & Init tables
-
-Defined in **on-run-start**:
-
-``` yml
-// dbt_project.yml
-
-Call macros to create schemas and tables
-
-```
-
-### 2. Incremental Models
-
-- Implemented for RAW and EDW layers.
-- Uses `delete+insert` **strategy** for efficient reprocessing.
-
-Example:
-
-``` yml    
-    +materialized: incremental
-    +incremental_strategy: delete+insert
-    +on_schema_change: ignore
-```
-
-### 3. Full Load Models
-
-- Certain **BAS tables** in **RAW layer** are build as full-refresh tables.
-
-Example:
-
-```yml
-+materialized: table
-+on_schema_change: ignore
-```
-
-### 4. Views for Reporting
-
-- EDW reporting layer models are materialized as views.
-
-``` yml
-
-+materialized: view
-
-```
-
-### 6. Tags for Model Grouping
-
-Models are grouped with **tags** for easy filtering:
-
-``` YML
-+tags: ["incremental_tables", "customer_sales"]
-+tags: ["edw", "reporting"]
-
-```
-
-### 7. Seeds 
-
-- Files are located in /seeds/customer_sales, load master data to snowflake.
-- Configure with environment.
-
-``` yml
-
-seeds:
-  +quote_columns: false
-  +schema: "SEED"
-  
-```
-
-### 8. Custom Macros
-
-- `macros/common`:- Common macros
-- `macros/raw/customer_sales`:- RAW layer macros
-- `macros/edw/customer_sales`:- EDW layer macros
-
-### 9. Testing Framework
 
 
 
