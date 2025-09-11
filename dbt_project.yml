@@ -105,11 +105,7 @@ models:
             +schema: CS_GENERAL_FACT
             +materialized: incremental
             +incremental_strategy: merge
-            +on_schema_change: ignore
-        reporting:
-          +tags: ["edw", "reporting_view", "reporting", "customer_sales"]
-          +schema: CS_REPORTING_SALES
-          +materialized: view
+            +on_schema_change: ignore        
     marts:
       customer_sales:
         +database: |
