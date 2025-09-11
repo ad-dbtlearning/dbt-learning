@@ -1,0 +1,21 @@
+version: 2
+
+macros:
+  - name: dim_customer_sales
+    description: |
+      - This macro create table *CS_GENERAL_DIM.DIM_CUSTOMER_SALES* if enot exist
+  - name: dim_customers
+    description: |
+      - This macro create table *CS_GENERAL_DIM.DIM_CUSTOMERs* if enot exist
+  - name: dim_distributors
+    description: |
+      - This macro create table *CS_GENERAL_DIM.DIM_DISTRIBUTORS* if enot exist
+  - name: dim_products
+    description: |
+      - This macro create table *CS_GENERAL_DIM.DIM_PRODUCTS* if enot exist
+  - name: dim_promotions
+    description: |
+      - This macro create table *CS_GENERAL_DIM.DIM_PROMOTIONS* if enot exist
+  - name: dim_region
+    description: |
+      - This macro create table *CS_GENERAL_DIM.DIM_REGION* if enot exist

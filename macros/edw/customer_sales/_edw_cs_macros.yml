@@ -1,0 +1,19 @@
+version: 2
+
+macros:
+  - name: edw_customer_sales_init_alltables
+    description: |
+      - This macro initializes all schemas and tables needed for the **Customer Sales project**.
+      - It creates schemas if they don’t already exist and then runs the required models.
+
+      - Steps included:
+          - **Cleaned (CLN) tables**
+            - Customers, Products, Region, Promotions, Distributors, Customer Sales
+          - **Dimension (DIM) tables**
+            - Customers, Customer Sales, Products, Region, Promotions, Distributors
+          - **Fact (FACT) tables**
+            - Customer Sales fact table
+
+      - Usage:
+          - Run this macro to set up the full data model (CLN → DIM → FACT).
+          - Example: {% raw %} {{ edw_customer_sales_init_alltables() }} {% endraw %}

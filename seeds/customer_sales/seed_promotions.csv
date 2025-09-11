@@ -1,0 +1,4 @@
+promotion_id,promotion_name,start_date,end_date,discount_percent
+1,Diwali Offer,2025-10-20,2025-11-10,10
+2,New Year Blast,2025-12-25,2026-01-10,15
+3,Summer Sale,2025-04-01,2025-04-30,5

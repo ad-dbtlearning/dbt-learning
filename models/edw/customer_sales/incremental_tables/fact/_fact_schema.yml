@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: edw_cs_fact_customer_sales
+    description: |
+      - This is the main customer sales fact table.
+      - Stores customer sales transactions at the **sales order line level**.
+      - Built on top of the cleaned customer sales data (`edw_cs_cln_customer_sales`).
+      - Links with multiple dimension tables:
+          - `edw_cs_dim_customers`
+          - `edw_cs_dim_products`
+          - `edw_cs_dim_promotions`
+          - `edw_cs_dim_region`
+          - `edw_cs_dim_cs_date`
+      - Incremental model with surrogate key `UNIQUE_SK` to ensure uniqueness.
+      - Downstream usage:
+          - Used for sales reporting and analytics.

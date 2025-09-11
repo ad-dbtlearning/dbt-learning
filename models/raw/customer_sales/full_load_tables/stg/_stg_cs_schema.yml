@@ -1,0 +1,37 @@
+version: 2
+
+models:
+  - name: load_stg_customers
+    description: |
+      - Staging table for customer data.
+      - Loaded from CSV seed files.
+      - Provides raw customer information.
+      - Used as the source for building the cleaned table `edw_cs_cln_customers`.
+
+  - name: load_stg_distributors
+    description: |
+      - Staging table for distributor data.
+      - Loaded from CSV seed files.
+      - Contains raw distributor details.
+      - Used as the source for building the cleaned table `edw_cs_cln_distributors`.
+
+  - name: load_stg_products
+    description: |
+      - Staging table for product data.
+      - Loaded from CSV seed files.
+      - Provides raw product information.
+      - Used as the source for building the cleaned table `edw_cs_cln_products`.
+
+  - name: load_stg_promotions
+    description: |
+      - Staging table for promotion data.
+      - Loaded from CSV seed files.
+      - Provides raw promotion information.
+      - Used as the source for building the cleaned table `edw_cs_cln_promotions`.
+
+  - name: load_stg_region
+    description: |
+      - Staging table for region data.
+      - Loaded from CSV seed files.
+      - Provides raw region and country details.
+      - Used as the source for building the cleaned table `edw_cs_cln_region`.
