@@ -26,7 +26,7 @@ WITH S_CUSTOMER_SALES AS (
 )
 
 SELECT
-    {{dbt_utils.generate_surrogate_key(['CS.SALES_ID', 'CS.CUSTOMER_ID', 'CS.PRODUCT_ID', 'CS.SALES_DATE'])}} AS UNIQUE_SK,
+    {{dbt_utils.generate_surrogate_key(['CS.SALES_ID', 'CS.CUSTOMER_ID', 'CS.PRODUCT_ID', 'CS.SALES_DATE', 'CS.UPDATED_AT'])}} AS UNIQUE_SK,
     CS.CUSTOMER_SALES_KEY,
     CS.SALES_ID,
     CS.SALES_DATE,
