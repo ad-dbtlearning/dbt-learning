@@ -1,43 +1,47 @@
-name: Deploy dbt Docs to Azure Storage
+name: Build & Deploy dbt Docs
 
 on:
   push:
-    branches:
-      - main  # or your deployment branch
+    branches: [ main ]
 
 jobs:
-  build-and-deploy:
+  dbt-docs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout code
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v3
 
-      # Setup Python (dbt needs it)
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
-      # Install dbt (replace with dbt-snowflake/dbt-bigquery/dbt-postgres/dbt-core etc.)
       - name: Install dbt
-        run: pip install dbt-core dbt-snowflake  # adjust to your adapter
+        run: pip install dbt-core dbt-snowflake  # change adapter if needed
 
-      # Run dbt docs generate
-      - name: Generate dbt docs
-        run: dbt docs generate --target dev
+      # Create profiles.yml dynamically from secrets
+      - name: Configure dbt profiles.yml
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<EOL
+          dbtdevlearning:
+            target: dev
+            outputs:
+              dev:
+                type: snowflake
+                account: SDSHEAP-TB75689
+                user: raju555
+                password: AdvaitSoni@123!
+                role: ACCOUNTADMIN
+                warehouse: COMPUTE_WH
+                database: DB_DEV_BI_RAW
+                schema: GENERAL
+          EOL
 
-      # Login to Azure
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          creds: |
-            {
-              "clientId": "${{ secrets.AZURE_CLIENT_ID }}",
-              "clientSecret": "${{ secrets.AZURE_CLIENT_SECRET }}",
-              "subscriptionId": "${{ secrets.AZURE_SUBSCRIPTION_ID }}",
-              "tenantId": "${{ secrets.AZURE_TENANT_ID }}"
-            }
+      - name: Build dbt docs
+        run: |
+          dbt deps
+          dbt docs generate --target dev
 
-     
+      
