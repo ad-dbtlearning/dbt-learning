@@ -26,7 +26,7 @@ jobs:
 
       # Run dbt docs generate
       - name: Generate dbt docs
-        run: dbt docs generate --target prod
+        run: dbt docs generate --target dev
 
       # Login to Azure
       - name: Azure Login
