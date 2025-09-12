@@ -1,0 +1,43 @@
+name: Deploy dbt Docs to Azure Storage
+
+on:
+  push:
+    branches:
+      - main  # or your deployment branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Setup Python (dbt needs it)
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      # Install dbt (replace with dbt-snowflake/dbt-bigquery/dbt-postgres/dbt-core etc.)
+      - name: Install dbt
+        run: pip install dbt-core dbt-snowflake  # adjust to your adapter
+
+      # Run dbt docs generate
+      - name: Generate dbt docs
+        run: dbt docs generate --target prod
+
+      # Login to Azure
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: |
+            {
+              "clientId": "${{ secrets.AZURE_CLIENT_ID }}",
+              "clientSecret": "${{ secrets.AZURE_CLIENT_SECRET }}",
+              "subscriptionId": "${{ secrets.AZURE_SUBSCRIPTION_ID }}",
+              "tenantId": "${{ secrets.AZURE_TENANT_ID }}"
+            }
+
+     
