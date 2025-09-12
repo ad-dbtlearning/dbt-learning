@@ -1,0 +1,48 @@
+{{
+  config(
+      alias='CLN_CUSTOMER_SALES',
+      unique_key='CUSTOMER_SALES_KEY',
+      cluster_by=['CUSTOMER_ID','PRODUCT_ID','SALES_DATE']
+  )
+}}
+
+
+WITH S_STG_CUSTOMER_SALES AS (
+    SELECT
+        SALES_ID,
+        SALES_DATE,
+        CUSTOMER_ID,
+        PRODUCT_ID,
+        QUANTITY,
+        UNIT_PRICE,
+        PROMOTION_ID,
+        DISCOUNT,
+        NET_PRICE,
+        TOTAL_REVENUE,
+        CREATED_AT,
+        UPDATED_AT,
+        CONCAT_WS('_', SALES_ID, SALES_DATE, CUSTOMER_ID, PRODUCT_ID) AS CUSTOMER_SALES_KEY
+    FROM {{ ref('load_stg_customer_sales') }}
+)
+
+SELECT 
+    SALES_ID,
+    SALES_DATE,
+    CUSTOMER_ID,
+    PRODUCT_ID,
+    QUANTITY,
+    UNIT_PRICE,
+    PROMOTION_ID,
+    DISCOUNT,
+    NET_PRICE,
+    TOTAL_REVENUE,
+    CURRENT_TIMESTAMP(9) AS VALID_FROM,
+    NULL AS VALID_TO,
+    TRUE AS IS_ACTIVE,
+    CURRENT_TIMESTAMP(9) AS CREATED_AT,
+    CURRENT_TIMESTAMP(9) AS UPDATED_AT,
+    CUSTOMER_SALES_KEY
+FROM S_STG_CUSTOMER_SALES
+{% if is_incremental() %}
+WHERE CUSTOMER_SALES_KEY NOT IN (SELECT CUSTOMER_SALES_KEY FROM {{ this}})
+{% endif %}

@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: mart_sales_by_customers
+    description: |
+      - This mart provides sales aggregated by customers.
+      - Built on top of `fact_customer_sales`.
+      - Helps to analyze total sales, revenue, and discounts per customer.
+      - Used for customer-level reporting.
+
+  - name: mart_sales_by_period
+    description: |
+      - This mart provides sales aggregated by time periods (day, month, quarter, year).
+      - Built on top of `fact_customer_sales`.
+      - Used for time-based reporting.
+
+  - name: mart_sales_by_products
+    description: |
+      - This mart provides sales aggregated by products.
+      - Built on top of `fact_customer_sales`.
+      - Helps to analyze product performance.
+      - Used for product-level reporting.
+
+  - name: mart_sales_by_rigion
+    description: |
+      - This mart provides sales aggregated by regions.
+      - Built on top of `fact_customer_sales`.

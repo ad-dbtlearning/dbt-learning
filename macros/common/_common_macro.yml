@@ -1,0 +1,44 @@
+version: 2
+
+macros:
+  - name: add_new_column
+    description: |
+      - This macro adds a new column to an existing table in Snowflake if it  does not already exist.
+      - It executes an ALTER TABLE statement with the specified column name and data type.
+      - **Usage example:**
+        {% raw %}{{ add_new_column('my_table', 'new_column', 'VARCHAR(100)') }}{% endraw %}
+    arguments:
+      - name: tbl_name
+        type: string
+        description: The name of the table to which the column will be added.
+      - name: column_name
+        type: string
+        description: The name of the new column to add.
+      - name: col_datatype
+        type: string
+        description: The data type of the new column (e.g., VARCHAR(100), NUMBER, DATE).
+  - name: create_schema_if_not_exists
+    description: |
+      - This macro will create schema if not exist
+      - ** Usage Example: **
+        {% raw %} {{create_schema_if_not_exists ('databasename', 'schemaname')}} {% endraw %}
+    arguments:
+      - name: database
+        type: string
+        description: The name of the database to which the schema will be created
+      - name: schema
+        type: string
+        description: The name of the schema to which you want to create
+  - name: generate_schema_name
+    description: |
+      - This will generate custom schema ignore default schema as prefix.
+  - name: get_database
+    description: |
+      - This macro used to get current environment's database name based on type like raw, and edw
+      - Usage Example:
+         {% raw %} {{get_database(db_type)}} {%endraw%}
+    arguments:
+      - name: db_type
+        type: string
+        description: |
+          - prodive db type like raw, edw and audit

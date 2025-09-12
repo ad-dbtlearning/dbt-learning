@@ -1,0 +1,21 @@
+version: 2
+
+macros:
+  - name: stg_customer_sales
+    description: |
+      - This macro create table *CS_GENERAL_STAGING.STG_CUSTOMER_SALES* if enot exist
+  - name: stg_customers
+    description: |
+      - This macro create table *CS_GENERAL_STAGING.STG_CUSTOMERs* if enot exist
+  - name: stg_distributors
+    description: |
+      - This macro create table *CS_GENERAL_STAGING.STG_DISTRIBUTORS* if enot exist
+  - name: stg_products
+    description: |
+      - This macro create table *CS_GENERAL_STAGING.STG_PRODUCTS* if enot exist
+  - name: stg_promotions
+    description: |
+      - This macro create table *CS_GENERAL_STAGING.STG_PROMOTIONS* if enot exist
+  - name: stg_region
+    description: |
+      - This macro create table *CS_GENERAL_STAGING.STG_REGION* if enot exist
